@@ -9,6 +9,8 @@ COPY package-lock.json .
 RUN npm install
 COPY . .
 EXPOSE 3000
+EXPOSE 1337
 RUN npm run build
 RUN npm install -g serve
-CMD serve -s build
+RUN serve -s build
+CMD ["node", "server.js"]
