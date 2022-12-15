@@ -12,4 +12,3 @@ EXPOSE 3000
 EXPOSE 1337
 RUN npm run build
 RUN npm install -g serve
-CMD ["npm", "run", "start"]
