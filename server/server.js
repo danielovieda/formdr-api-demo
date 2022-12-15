@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
@@ -11,6 +10,11 @@ const pass = process.env.REACT_APP_FORMDR_PASSWORD;
 const client = process.env.REACT_APP_FORMDR_CLIENT_ID;
 const secret = process.env.REACT_APP_FORMDR_SECRET_ID;
 const practiceId = process.env.REACT_APP_PRACTICE_ID;
+if (!user || !pass || !client || !secret) {
+  console.log("env var missing.")
+  console.log("exiting...")
+  process.exit(1);
+}
 var accessToken;
 var apiUrl = "https://api.formdr.com/api/v1";
 
@@ -105,6 +109,10 @@ app.get("/patient-submissions", async (req, res) => {
             .status(400)
             .send({ message: "Please check your credentials and/or token." });
           return;
+          case "Invalid token: access token has expired":
+            getToken();
+            res.status(500).send({message: 'Please try again.'})
+            return;
         default:
           res.status(404).send({ message: "Patient not found." });
           return;
