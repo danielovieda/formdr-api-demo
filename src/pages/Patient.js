@@ -25,7 +25,7 @@ export default function Patient() {
   useEffect(() => {
     async function getPatient() {
       await fetch(
-        `http://localhost:1337/patient-submissions?firstName=${firstName}&lastName=${lastName}`
+        `${process.env.REACT_APP_API_URL}/patient-submissions?firstName=${firstName}&lastName=${lastName}`
       )
         .then((data) => {
           return data.json();

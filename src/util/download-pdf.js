@@ -1,5 +1,5 @@
 async function downloadPdf(submissionId, filename) {
-    await fetch(`http://localhost:1337/download-pdf?submissionId=${submissionId}`)
+    await fetch(`${process.env.REACT_APP_API_URL}/download-pdf?submissionId=${submissionId}`)
       .then((data) => {
         return data.json();
       })
