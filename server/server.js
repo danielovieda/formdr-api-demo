@@ -11,6 +11,10 @@ const client = process.env.REACT_APP_FORMDR_CLIENT_ID;
 const secret = process.env.REACT_APP_FORMDR_SECRET_ID;
 const practiceId = process.env.REACT_APP_PRACTICE_ID;
 
+console.log("*************************************");
+console.log("SERVER START");
+console.log(user,pass,client,secret);
+
 var accessToken;
 var apiUrl = "https://api.formdr.com/api/v1";
 
