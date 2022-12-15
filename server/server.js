@@ -10,11 +10,7 @@ const pass = process.env.REACT_APP_FORMDR_PASSWORD;
 const client = process.env.REACT_APP_FORMDR_CLIENT_ID;
 const secret = process.env.REACT_APP_FORMDR_SECRET_ID;
 const practiceId = process.env.REACT_APP_PRACTICE_ID;
-if (!user || !pass || !client || !secret) {
-  console.log("env var missing.")
-  console.log("exiting...")
-  process.exit(1);
-}
+
 var accessToken;
 var apiUrl = "https://api.formdr.com/api/v1";
 
