@@ -1,26 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { startCase } from "lodash";
 import * as dayjs from "dayjs";
+import axios from "axios";
+import { TokenContext } from "../App";
+import makeConfig from "../util/make-config";
+import InfoIcon from "@mui/icons-material/Info";
+import TourMessage from "../components/tour-message";
 
 export default function Records() {
   const [records, setRecords] = useState(null);
+  const [open, setOpen] = useState(false);
+  const {accessToken, practiceId} = useContext(TokenContext);
 
   useEffect(() => {
-    async function getRecords() {
-      await fetch(`${process.env.REACT_APP_API_URL}/get-records`)
-        .then((data) => {
-          return data.json();
-        })
-        .then((data) => {
-          setRecords(data);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+    async function getData() {
+      await axios(makeConfig("get", `/practice/${practiceId}/records`, accessToken))
+    .then((response) => {
+      setRecords(response.data)
+    })
+    .catch((e) => {
+      console.log(e);
+    });
     }
 
-    getRecords();
+    getData();
   }, []);
 
   function lower(string) {
@@ -31,8 +35,31 @@ export default function Records() {
     }
   }
 
+  var message = `<p><b>GET</b> /api/v1/practice/:practiceId/records<br /><br />
+  Returns an array of records available to the practice.
+  </p>`;
+
+  const handleOpen = () => {
+    setOpen(!open);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
     <>
+    <TourMessage
+        message={message}
+        open={open}
+        close={handleClose}
+      />
+      <div className="card mb-3">
+        <h5 className="card-title text-center p-2 pt-3">
+          Get Records
+          <InfoIcon onClick={handleOpen} />
+        </h5>
+      </div>
       {records ? (
         <h4>Total records found: {records.totalRecords}</h4>
       ) : null}

@@ -1,30 +1,59 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { startCase } from "lodash";
 import * as dayjs from "dayjs";
 import { Link } from "react-router-dom";
 import downloadPdf from "../util/download-pdf";
+import { TokenContext } from "../App";
+import makeConfig from "../util/make-config";
+import axios from "axios";
+import InfoIcon from "@mui/icons-material/Info";
+import TourMessage from "../components/tour-message";
 
 export default function Submissions() {
   const [submissions, setSubmissions] = useState(null);
   const [page, setPage] = useState(1);
+  const {accessToken, practiceId} = useContext(TokenContext);
+  const [open, setOpen] = useState(false);
 
   async function getSubmissions(page) {
     if (!page) page = 1;
-    await fetch(`${process.env.REACT_APP_API_URL}/get-submissions?page=${page}`)
-      .then((data) => {
-        return data.json();
-      })
-      .then((data) => setSubmissions(data))
-      .catch((e) => {
-        console.log(e);
-      });
+    await axios(makeConfig("get", `/practice/${practiceId}/submissions?page=${page}`, accessToken))
+    .then((response) => {
+      setSubmissions(response.data)
+    })
+    .catch((e) => {
+      console.log(e);
+    });
   }
 
   useEffect(() => {
     getSubmissions(page);
   }, [page]);
+
+  var message = `<p><b>GET</b> /api/v1/practice/:practiceId/submissions?page=1<br /><br />
+  Returns an array of submissions available to the practice.
+  </p>`;
+
+  const handleOpen = () => {
+    setOpen(!open);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
-    <>
+    <>  <TourMessage
+    message={message}
+    open={open}
+    close={handleClose}
+  />
+  <div className="card mb-3">
+    <h5 className="card-title text-center p-2 pt-3">
+      Get Submissions
+      <InfoIcon onClick={handleOpen} />
+    </h5>
+  </div>
       {submissions ? (
         <div>
           <div className="mb-3">
@@ -43,10 +72,10 @@ export default function Submissions() {
                 </div>
                 <div className="card-footer">
                 <Link to={`/submission/${submission.submissionId}`}>View</Link> {" "}
-                  <Link to={`/sign/${submission.submissionId}`}>Sign</Link> <span className="link-primary text-decoration-underline" onClick={() => {
-                    downloadPdf(submission.submissionId, `${submission.submissionId}.pdf`)
+                  <span className="link-primary text-decoration-underline" style={{cursor: 'pointer'}} onClick={() => {
+                    downloadPdf(submission.submissionId, `${submission.submissionId}.pdf`, practiceId, accessToken)
                   }}>Download</span> Updated
-                  at: {dayjs(submission.datetime).format("MM/DD/YYYY hh:mm a")}
+                  at: {dayjs(submission.updatedAt).format("MM/DD/YYYY hh:mm a")}
                 </div>
               </div>
             );

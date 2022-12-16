@@ -1,28 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import PdfViewerComponent from "../components/PdfViewerComponent";
 import { useParams } from "react-router-dom";
+import { TokenContext } from "../App";
+import makeConfig from "../util/make-config";
+import axios from "axios";
 
 const Sign = () => {
   const { submissionId } = useParams();
   const [pdf, setPdf] = useState(null);
+  const {accessToken, practiceId} = useContext(TokenContext);
 
   useEffect(() => {
-    async function pipePdf(submissionId) {
-      await fetch(
-        `${process.env.REACT_APP_API_URL}/download-pdf?submissionId=${submissionId}`
-      )
-        .then((data) => {
-            return data.json();
-        })
-        .then((data) => {
-          setPdf(data);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+    async function getPdf(submissionId) {
+        await axios(makeConfig(
+            'get',
+            `/practice/${practiceId}/submissions/${submissionId}/pdf`,
+            accessToken
+          ), {responseType: 'arraybuffer'}).then((response) => { setPdf(response.data)})
     }
 
-    pipePdf(submissionId);
+    getPdf(submissionId);
   }, []);
 
   return (

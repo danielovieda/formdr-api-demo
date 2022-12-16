@@ -1,15 +1,20 @@
 import { useParams } from "react-router-dom";
 import { startCase } from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import InfoIcon from "@mui/icons-material/Info";
 import TourMessage from "../components/tour-message";
 import EmrModal from '../components/emrModal';
 import downloadPdf from '../util/download-pdf';
+import { TokenContext } from "../App";
+import makeConfig from "../util/make-config";
+import axios from "axios";
 
 export default function Patient() {
   const { firstName, lastName } = useParams();
   const [submissions, setSubmissions] = useState(new Array(0));
   const [open, setOpen] = useState(false);
+  const {accessToken, practiceId} = useContext(TokenContext);
+
   var message = `<p><b>GET</b> /api/v1/practice/123?firstName=${firstName}&lastName=${lastName}<br /><br />
   Returns an array of submissions with various data.
   </p>`;
@@ -24,14 +29,15 @@ export default function Patient() {
 
   useEffect(() => {
     async function getPatient() {
-      await fetch(
-        `${process.env.REACT_APP_API_URL}/patient-submissions?firstName=${firstName}&lastName=${lastName}`
+      await axios(
+        makeConfig(
+          "get",
+          `/practice/${practiceId}?firstName=${firstName}&lastName=${lastName}`,
+          accessToken
+        )
       )
-        .then((data) => {
-          return data.json();
-        })
-        .then((data) => {
-          setSubmissions(data);
+        .then((response) => {
+          setSubmissions(response.data)
         })
         .catch((e) => {
           console.log(e);
@@ -47,8 +53,6 @@ export default function Patient() {
       <TourMessage
         message={message}
         open={open}
-        firstName={firstName}
-        lastName={lastName}
         close={handleClose}
       />
       <div className="card mb-3">
@@ -100,22 +104,12 @@ export default function Patient() {
                                       submission.submissionId,
                                       `${startCase(firstName)}_${startCase(
                                         lastName
-                                      )}_${submission.submissionId}.pdf`
+                                      )}_${submission.submissionId}.pdf`, practiceId, accessToken
                                     );
                                   }}
                                 >
                                   Download PDF
                                 </button>
-                              </li>
-                              <li className="list-group-item border-0">
-                                <button className="btn btn-primary p-1" data-toggle="modal" data-target="#exampleModal">
-                                  Send to EMR
-                                </button>
-                              </li>
-                              <li className="list-group-item border-0">
-                                <a href={`/sign/${submission.submissionId}`} className="btn btn-primary p-1">
-                                  Sign
-                                </a>
                               </li>
                             </ul>
                           </div>
